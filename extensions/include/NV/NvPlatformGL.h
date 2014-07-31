@@ -60,10 +60,15 @@
 #define GLEW_NO_GLU
 #endif
 
-#define GLEW_STATIC
-#include <GL/glew.h>
-#define GLFW_INCLUDE_ES2
-#include <GLFW/glfw3.h>
+#ifdef EMSCRIPTEN
+    #include <GL/glew.h>
+    #include <GL/glfw.h>
+#else
+    #define GLEW_STATIC
+    #include <GL/glew.h>
+    #define GLFW_INCLUDE_ES2
+    #include <GLFW/glfw3.h>
+#endif
 
 #elif defined(ANDROID)
 

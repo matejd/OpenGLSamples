@@ -252,6 +252,10 @@ private:
     uint32_t m_testModeIssues;
 
     const static int32_t TESTMODE_WARMUP_FRAMES = 10;
+
+#ifdef EMSCRIPTEN
+    friend void emscriptenDrawCallback();
+#endif
 };
 
 #endif

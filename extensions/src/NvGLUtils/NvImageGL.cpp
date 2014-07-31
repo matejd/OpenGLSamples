@@ -81,6 +81,10 @@ uint32_t NvImage::UploadTextureFromDDSData(const char* ddsData, int32_t length) 
     return texID;
 }
 
+bool isPowerOfTwo(int value) {
+    return (value & (value-1)) == 0;
+}
+
 uint32_t NvImage::UploadTexture(NvImage* image) {
     GLuint texID = 0;
 
@@ -120,7 +124,14 @@ uint32_t NvImage::UploadTexture(NvImage* image) {
 
         int32_t w = image->getWidth();
         int32_t h = image->getHeight();
-        for (int32_t l = 0; l < image->getMipLevels(); l++) {
+
+        int32_t num_levels = image->getMipLevels();
+#ifdef EMSCRIPTEN
+        // WebGL requires power of 2 textures (except the zeroth level without mipmapping).
+        if (!isPowerOfTwo(w) || !isPowerOfTwo(h))
+            num_levels = 1;
+#endif
+        for (int32_t l = 0; l < num_levels; l++) {
             if (image->isCompressed()) {
                 glCompressedTexImage2D( GL_TEXTURE_2D, l, internalFormat, w, h,
                     0, image->getImageSize(l), image->getLevel(l));

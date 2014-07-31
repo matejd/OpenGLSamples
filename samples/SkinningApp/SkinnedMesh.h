@@ -41,6 +41,12 @@
 
 #define HALF_FLOAT_ENUM(isES2) ((isES2) ? 0x8D61 : 0x140B) // GL_HALF_FLOAT_OES : GL_HALF_FLOAT
 
+#ifdef EMSCRIPTEN
+// Vertex attribute of type half does not seem to be supported
+#define half float
+#undef HALF_FLOAT_ENUM
+#define HALF_FLOAT_ENUM(isES2) GL_FLOAT
+#endif
 
 class SkinnedVertex;
 
@@ -85,9 +91,15 @@ public:
     half             m_normal[3];
     half             m_weights[4];
 
+#ifdef EMSCRIPTEN
+    static const int32_t PositionOffset = 0;
+    static const int32_t NormalOffset   = 12;
+    static const int32_t WeightsOffset  = 24;
+#else
     static const int32_t PositionOffset = 0;   // [ 0, 5]
     static const int32_t NormalOffset   = 6;   // [6, 11]
     static const int32_t WeightsOffset  = 12;  // [12, 19]
+#endif
 };
 
 #endif
