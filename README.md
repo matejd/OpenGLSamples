@@ -1,5 +1,5 @@
-SkinningApp from NVIDIA's samples ported to WebGL
--------------------------------------------------
+WebGL SkinningApp sample
+------------------------
 
 NVIDIA provides cross-platform OpenGL samples (see README below). This fork is a WebGL (Emscripten) port
 of a specific sample (SkinningApp) which is designed to work under OpenGL ES 2 (on Android).
