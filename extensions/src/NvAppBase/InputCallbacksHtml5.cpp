@@ -32,19 +32,19 @@
 //
 //----------------------------------------------------------------------------------
 
-#if defined(LINUX) && defined(EMSCRIPTEN)
+#ifdef EMSCRIPTEN
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <vector>
 #include <map>
 
-#include <GL/glew.h>
 #include <GL/glfw.h>
 
 #include "NvAppBase/NvPlatformContext.h"
+#include "NV/NvLogs.h"
 
-extern NvInputCallbacks* sCallbacks;
+extern NvInputCallbacks* sCallbacks; // MainHtml5.cpp
 static std::map<int32_t, NvKey::Enum> sKeyCodeRemap;
 
 void prepareKeyCodeRemap() {
@@ -183,7 +183,6 @@ void setInputCallbacksGLFW()
     glfwSetKeyCallback(glfw_key);
     glfwSetMousePosCallback(glfw_motion);
     glfwSetMouseButtonCallback(glfw_mouse);
-    //glfwSetMouseWheelCallback(glfwOnMouseWheel);
 }
 
-#endif // WIN32 || LINUX || MACOSX
+#endif // EMSCRIPTEN
