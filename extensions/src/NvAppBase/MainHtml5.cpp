@@ -32,7 +32,11 @@
 //
 //----------------------------------------------------------------------------------
 
-#ifdef LINUX
+// This file is based on MainLinux64.cpp, which uses GLFW 3. Since Emscripten
+// still doesn't support that version (latest is 2.7), code was backported.
+// Backporting also required changing InputCallbacksGLFW.cpp (new file InputCallbacksHtml5.cpp).
+//
+#ifdef EMSCRIPTEN
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -41,84 +45,60 @@
 
 #include <GL/glew.h>
 #include <GL/glfw.h>
-//#include <GL/glx.h>
 
 #include <emscripten/emscripten.h>
 
 #include "NvAppBase/NvAppBase.h"
 #include "NV/NvStopWatch.h"
 #include "NvAssetLoader/NvAssetLoader.h"
+#include "NV/NvLogs.h"
 
 class NvHtml5StopWatch: public NvStopWatch
 {
 public:
-    //! Constructor, default
-    NvHtml5StopWatch() :
-        start_time(), diff_time( 0.0)
-    { };
-
-    // Destructor
-    ~NvHtml5StopWatch()
-    { };
+    NvHtml5StopWatch() : start_time(), diff_time(0.0) {};
+    ~NvHtml5StopWatch() {};
 
 public:
-    //! Start time measurement
     void start() {
         clock_gettime(CLOCK_MONOTONIC, &start_time);
         m_running = true;
     }
 
-    //! Stop time measurement
     void stop() {
         diff_time = getDiffTime();
         m_running = false;
     }
 
-    //! Reset time counters to zero
-    void reset()
-    {
+    void reset() {
         diff_time = 0;
-        if( m_running )
+        if (m_running)
             start();
     }
 
     const float getTime() const {
-        if(m_running) {
+        if (m_running) {
             return getDiffTime();
         } else {
-            // time difference in milli-seconds
-            return  diff_time;
+            return diff_time;
         }
     }
 
 private:
-
-    // helper functions
-      
-    //! Get difference between start time and current time
     float getDiffTime() const {
         struct timespec now;
         clock_gettime(CLOCK_MONOTONIC, &now);
-        return  (float) (( now.tv_sec - start_time.tv_sec)
+        return  (float) ((now.tv_sec - start_time.tv_sec)
                     + (0.000000001 * (now.tv_nsec - start_time.tv_nsec)) );
     }
 
-    // member variables
-
-    //! Start of measurement
-    struct timespec  start_time;
-
-    //! Time difference between the last start and stop
-    float  diff_time;
+    struct timespec start_time;
+    float diff_time;
 };
 
-
 static NvAppBase *sApp = NULL;
-
-// this needs to be global so inputcallbacksglfw can access...
 NvInputCallbacks* sCallbacks = NULL;
 extern void setInputCallbacksGLFW();
-
 static bool sWindowIsFocused = true;
 static bool sHasResized = true;
 static int32_t sForcedRenderCount = 0;
@@ -130,24 +110,14 @@ public:
             NvGLPlatformCategory::PLAT_MOBILE, 
             NvGLPlatformOS::OS_LINUX))
     {
-        // Hack - we can't query most of this back from GLFW, so we assume it all "took"
         mConfig = config;
-
-        //glfwWindowHint(GLFW_RED_BITS, config.redBits);
-        //glfwWindowHint(GLFW_GREEN_BITS, config.greenBits);
-        //glfwWindowHint(GLFW_BLUE_BITS, config.blueBits);
-        //glfwWindowHint(GLFW_ALPHA_BITS, config.alphaBits);
-        //glfwWindowHint(GLFW_DEPTH_BITS, config.depthBits);
-        //glfwWindowHint(GLFW_STENCIL_BITS, config.stencilBits);
     }
 
     bool bindContext() {
-        //glfwMakeContextCurrent(mWindow);
         return true;
     }
 
     bool unbindContext() {
-        //glfwMakeContextCurrent(NULL);
         return true;
     }
 
@@ -185,12 +155,10 @@ public:
 
     virtual void* getCurrentPlatformContext() { 
         return NULL;
-        //return (void*)glXGetCurrentContext(); 
     }
 
     virtual void* getCurrentPlatformDisplay() { 
         return NULL;
-        //return (void*)glXGetCurrentDisplay(); 
     }
 
 protected:
@@ -202,10 +170,10 @@ public:
     ~NvHtml5PlatformContext() {}
 
     virtual bool isAppRunning();
-    virtual void requestExit() { }//glfwSetWindowShouldClose(mWindow, 1); }
+    virtual void requestExit() {}
     virtual bool pollEvents(NvInputCallbacks* callbacks);
     virtual bool isContextLost() { return false; }
-    virtual bool isContextBound() { return true; }//glfwGetCurrentContext() != NULL; }
+    virtual bool isContextBound() { return true; }
     virtual bool shouldRender();
     virtual bool hasWindowResized();
     virtual NvGamepad* getGamepad() { return NULL; }
@@ -223,7 +191,8 @@ bool NvHtml5PlatformContext::isAppRunning() {
 bool NvHtml5PlatformContext::pollEvents(NvInputCallbacks* callbacks) {
     sCallbacks = callbacks;
     glfwPollEvents();
-    sCallbacks = NULL;
+    // In the browser, we need to keep sCallbacks non-null.
+    //sCallbacks = NULL;
     return true;
 }
 
@@ -259,10 +228,6 @@ static void focus(int32_t focused)
     sForcedRenderCount += 2;
 }
 
-void glfwError(int,const char* err) {
-    fprintf( stderr, "GLFW error = %s\n", err);
-}
-
 int32_t main(int32_t argc, char *argv[])
 {
     int32_t width, height;
@@ -271,11 +236,10 @@ int32_t main(int32_t argc, char *argv[])
 
     NvAssetLoaderInit(NULL);
     if (glfwInit() != GL_TRUE) {
-        fprintf(stderr, "Failed to initialize GLFW\n");
+        LOGE("Failed to initialize GLFW!");
         exit(EXIT_FAILURE);
     }
 
-    //glfwSetErrorCallback(glfwError);
     NvHtml5PlatformContext* platform = new NvHtml5PlatformContext;
     for (int i = 1; i < argc; i++) {
         platform->m_commandLine.push_back(argv[i]);
@@ -286,24 +250,20 @@ int32_t main(int32_t argc, char *argv[])
     sApp->configurationCallback(config);
 
     NvGLHtml5AppContext* context = new NvGLHtml5AppContext(config);
-    if (glfwOpenWindow(1280, 720, 8,8,8,0, 24,0, GLFW_WINDOW) != GL_TRUE) {
-        fprintf(stderr, "Failed to open GLFW window\n");
+    if (glfwOpenWindow(800, 600, 8,8,8,0, 24,0, GLFW_WINDOW) != GL_TRUE) {
+        LOGE("Failed to open GLFW window!");
         glfwTerminate();
         exit(EXIT_FAILURE);
     }
 
-    //context->setWindow(window);
     sApp->setGLContext(context);
     glfwSetWindowSizeCallback(reshape);
-    //glfwSetWindowFocusCallback(window, focus);
     setInputCallbacksGLFW();
     context->bindContext();
     glfwSwapInterval(1);
     glfwGetWindowSize(&width, &height);
 
-    //int32_t major = glfwGetWindowParam(GLFW_OPENGL_VERSION_MAJOR);
-    //int32_t minor = glfwGetWindowParam(GLFW_OPENGL_VERSION_MINOR);
-    config.apiVer = NvGfxAPIVersionES2(); //NvGfxAPIVersion(NvGfxAPI::GLES, major, minor);
+    config.apiVer = NvGfxAPIVersionES2();
     glGetIntegerv(GL_RED_BITS, (GLint*)&config.redBits);
     glGetIntegerv(GL_GREEN_BITS, (GLint*)&config.greenBits);
     glGetIntegerv(GL_BLUE_BITS, (GLint*)&config.blueBits);
@@ -314,10 +274,9 @@ int32_t main(int32_t argc, char *argv[])
 
     GLenum err = glewInit();
     if (err != GLEW_OK) {
-        fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
+        LOGE("Error: %s\n", glewGetErrorString(err));
         exit(-1);
     }
-    fprintf(stdout, "Using GLEW %s\n", glewGetString(GLEW_VERSION));
 
     reshape(width, height);
     sApp->mainLoop();
