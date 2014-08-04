@@ -1,3 +1,33 @@
+SkinningApp from NVIDIA's samples ported to WebGL
+-------------------------------------------------
+
+NVIDIA provides cross-platform OpenGL samples (see README below). This fork is a WebGL (Emscripten) port
+of a specific sample (SkinningApp) which is designed to work under OpenGL ES 2 (on Android).
+There are only minor modifications:
+* Main loop (`NvSampleApp`) was modified to support callback based `emscripten_set_main_loop` since
+the main loop in browsers is asynchronous.
+* `MainLinux64.cpp` was backported from GLFW 3 to GLFW 2.7 (new file `MainHtml5.cpp`), also required
+changes to input callbacks (`InputCallbacksHtml5.cpp`).
+* `half` (2 bytes) vertex attribute type does not seem to be supported (used in SkinningApp sample), so it was
+replaced with plain `float` (4 bytes).
+
+
+Building the sample with Emscripten
+-----------------------------------
+
+Install Emscripten and make sure em++ is visible. Go to
+`{SAMPLES_ROOT}/samples/build/html5/`
+
+and run make. SkinningApp is built and placed into
+`{SAMPLES_ROOT}/samples/bin/html5/`
+
+Check the results with
+`python -m SimpleHTTPServer 8080`
+
+or something similar. Tested with Emscripten 1.21.0.
+
+
+
 NVIDIA GameWorks OpenGL Graphics and Compute Samples
 ====================================================
 
