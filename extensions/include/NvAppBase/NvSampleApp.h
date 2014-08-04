@@ -253,8 +253,17 @@ private:
 
     const static int32_t TESTMODE_WARMUP_FRAMES = 10;
 
+    // mainLoop method was split into a setup and "main" main loop (mainLoopInternal).
+    // In a browser, emscriptenMainLoopCallback gets called, which in turn calls
+    // mainLoopInternal. Offline, we call mainLoopInternal directly.
+    bool mHasInitializedGL;// = false;
+    NvStopWatch* mTestModeTimer;// = createStopWatch();
+    int32_t mTestModeFrames;// = -TESTMODE_WARMUP_FRAMES;
+    float mTotalTime;// = -1e6f; // don't exit during startup
+
+    void mainLoopInternal();
 #ifdef EMSCRIPTEN
-    friend void emscriptenDrawCallback();
+    friend void emscriptenMainLoopCallback();
 #endif
 };
 
