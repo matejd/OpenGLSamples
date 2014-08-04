@@ -42,7 +42,7 @@
 #define HALF_FLOAT_ENUM(isES2) ((isES2) ? 0x8D61 : 0x140B) // GL_HALF_FLOAT_OES : GL_HALF_FLOAT
 
 #ifdef EMSCRIPTEN
-// Vertex attribute of type half does not seem to be supported
+// Vertex attribute of type half does not seem to be supported in WebGL.
 #define half float
 #undef HALF_FLOAT_ENUM
 #define HALF_FLOAT_ENUM(isES2) GL_FLOAT

@@ -516,6 +516,7 @@ int32_t NvBFInitialize(uint8_t count, const char* filename[][2])
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, bitfont->m_tex);
 #ifdef EMSCRIPTEN
+        // Disable mipmapping in WebGL, it's not supported when using non-power-of-two textures!
         glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 #else
         if (image->getMipLevels()>1)

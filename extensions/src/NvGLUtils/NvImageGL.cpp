@@ -127,7 +127,7 @@ uint32_t NvImage::UploadTexture(NvImage* image) {
 
         int32_t num_levels = image->getMipLevels();
 #ifdef EMSCRIPTEN
-        // WebGL requires power of 2 textures (except the zeroth level without mipmapping).
+        // WebGL requires power of 2 textures (except in the case of a single level when not using mipmapping).
         if (!isPowerOfTwo(w) || !isPowerOfTwo(h))
             num_levels = 1;
 #endif
