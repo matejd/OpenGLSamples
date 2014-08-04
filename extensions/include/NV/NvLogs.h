@@ -67,7 +67,7 @@ extern void NVWindowsLog(const char* fmt, ...);
 #include <stdlib.h> // for exit()
 #include <stdio.h>
 
-#define LOGI(...) { fprintf(stderr, __VA_ARGS__); fprintf(stderr, "\n"); }
+#define LOGI(...) { fprintf(stdout, __VA_ARGS__); fprintf(stdout, "\n"); }
 #define LOGE(...) { fprintf(stderr, __VA_ARGS__); fprintf(stderr, "\n"); }
 
 #else

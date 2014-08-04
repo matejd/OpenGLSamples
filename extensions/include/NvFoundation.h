@@ -151,7 +151,7 @@ Platform define
 #	endif
 #elif defined NV_GNUC
 #   ifdef __CELLOS_LV2__
-#	define NV_PS3
+#	    define NV_PS3
 #		define NV_VMX
 #   elif defined(__arm__)
 #		define NV_ARM
@@ -175,10 +175,13 @@ Platform define
 #       define NV_PPC
 #   elif defined(__ppc64__)
 #       define NV_PPC
-#	define NV_PPC64
+#	    define NV_PPC64
+#   elif defined(EMSCRIPTEN)
+#       define NV_X64
 #   else
 #	error "Unknown platform"
 #   endif
+
 #	if defined(ANDROID)
 #   	define NV_ANDROID
 #   	define NV_UNIX

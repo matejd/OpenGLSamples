@@ -46,6 +46,10 @@
 #include <stdarg.h>
 #include <sstream>
 
+#ifdef EMSCRIPTEN
+#include <emscripten/emscripten.h>
+#endif
+
 NvSampleApp::NvSampleApp(NvPlatformContext* platform, const char* appTitle) : 
     NvAppBase(platform, appTitle)
     , mFramerate(0L)
@@ -600,157 +604,174 @@ bool NvSampleApp::gamepadChanged(uint32_t changedPadFlags) {
     return m_transformer->processGamepad(changedPadFlags, *pad);
 }
 
-void NvSampleApp::mainLoop() {
-    bool hasInitializedGL = false;
+// When in browser, we do not have control over the main loop.
+// Instead, we must use emscripten_set_main_loop to setup a callback.
+#ifdef EMSCRIPTEN
+static NvSampleApp* em_app = NULL;
+void emscriptenMainLoopCallback() {
+    if (em_app->getPlatformContext()->isAppRunning() && !em_app->isExiting())
+        em_app->mainLoopInternal();
+}
+#endif
 
-    NvStopWatch* testModeTimer = createStopWatch();
-    int32_t testModeFrames = -TESTMODE_WARMUP_FRAMES;
-    float totalTime = -1e6f; // don't exit during startup
+void NvSampleApp::mainLoop() {
+    mHasInitializedGL = false;
+    mTestModeTimer = createStopWatch();
+    mTestModeFrames = -TESTMODE_WARMUP_FRAMES;
+    mTotalTime = -1e6f; // don't exit during startup
 
     if (mTestMode) {
         writeLogFile(mTestName, false, "*** Starting Test\n");
     }
 
     mFramerate = new NvFramerateCounter(this);
-
     mFrameTimer->start();
 
+#ifdef EMSCRIPTEN
+    em_app = this;
+    emscripten_set_main_loop(emscriptenMainLoopCallback, 0, 1);
+#else
     while (getPlatformContext()->isAppRunning() && !isExiting()) {
-        bool needsReshape = false;
-
-        getPlatformContext()->pollEvents(this);
-
-        NvPlatformContext* ctx = getPlatformContext();
-
-        baseUpdate();
-
-        // If the context has been lost and graphics resources are still around,
-        // signal for them to be deleted
-        if (ctx->isContextLost()) {
-            if (hasInitializedGL) {
-                baseShutdownRendering();
-                hasInitializedGL = false;
-            }
-        }
-
-        // If we're ready to render (i.e. the GL is ready and we're focused), then go ahead
-        if (ctx->shouldRender()) {
-            // If we've not (re-)initialized the resources, do it
-            if (!hasInitializedGL) {
-                NvImage::setAPIVersion(getGLContext()->getConfiguration().apiVer);
-
-                baseInitRendering();
-                hasInitializedGL = true;
-                needsReshape = true;
-
-                // In test mode, disable VSYNC if possible
-                if (mTestMode)
-                    getGLContext()->setSwapInterval(0);
-            } else if (ctx->hasWindowResized()) {
-                if (mUIWindow) {
-                    const int32_t w = getGLContext()->width(), h = getGLContext()->height();
-                    mUIWindow->HandleReshape((float)w, (float)h);
-                }
-
-                needsReshape = true;
-            }
-
-            if (needsReshape) {
-                baseReshape(getGLContext()->width(), getGLContext()->height());
-            }
-
-            mFrameTimer->stop();
-
-            if (mTestMode) {
-                // Simulate 60fps
-                mFrameDelta = 1.0f / 60.0f;
-
-                // just an estimate
-                totalTime += mFrameTimer->getTime();
-            } else {
-                mFrameDelta = mFrameTimer->getTime();
-                // just an estimate
-                totalTime += mFrameDelta;
-            }
-            m_transformer->update(mFrameDelta);
-            mFrameTimer->reset();
-
-            // initialization may cause the app to want to exit
-            if (!isExiting()) {
-                mFrameTimer->start();
-
-                if (mAutoRepeatButton) {
-                    const float elapsed = mAutoRepeatTimer->getTime();
-                    if ( (!mAutoRepeatTriggered && elapsed >= 0.5f) ||
-                         (mAutoRepeatTriggered && elapsed >= 0.04f) ) { // 25hz repeat
-                        mAutoRepeatTriggered = true;
-                        gamepadButtonChanged(mAutoRepeatButton, true);
-                    }
-                }
-
-                baseDraw();
-                CHECK_GL_ERROR(); // sanity catch errors
-                if (!mTestMode) {
-                    baseDrawUI();
-                    CHECK_GL_ERROR(); // sanity catch errors
-                }
-
-                if (mTestMode && (mTestRepeatFrames > 1)) {
-                    // repeat frame so that we can simulate a heavier workload
-                    for (int i = 1; i < mTestRepeatFrames; i++) {
-                        baseUpdate();
-                        m_transformer->update(mFrameDelta);
-                        baseDraw();
-                    }
-                }
-
-                if (mTestMode && mUseFBOPair) {
-                    // Check if the app bound FBO 0 in FBO mode
-                    GLuint currFBO = 0;
-                    // Enum has MANY names based on extension/version
-                    // but they all map to 0x8CA6
-                    glGetIntegerv(0x8CA6, (GLint*)&currFBO);
-
-                    if (currFBO == 0)
-                        m_testModeIssues |= TEST_MODE_FBO_ISSUE;
-                }
-
-                SwapBuffers();
-
-                if (mFramerate->nextFrame()) {
-                    // for now, disabling console output of fps as we have on-screen.
-                    // makes it easier to read USEFUL log output messages.
-                    LOGI("fps: %.2f", mFramerate->getMeanFramerate());
-                }
-            }
-
-            if (mTestMode) {
-                testModeFrames++;
-                // if we've come to the end of the warm-up, start timing
-                if (testModeFrames == 0) {
-                    totalTime = 0.0f;
-                    testModeTimer->start();
-                }
-
-                if (totalTime > mTestDuration) {
-                    testModeTimer->stop();
-                    double frameRate = testModeFrames / testModeTimer->getTime();
-                    logTestResults((float)frameRate, testModeFrames);
-                    exit(0);
-//                    appRequestExit();
-                }
-            }
-        }
+        mainLoopInternal();
     }
+#endif
 
-    if (hasInitializedGL) {
+    if (mHasInitializedGL) {
         baseShutdownRendering();
-        hasInitializedGL = false;
+        mHasInitializedGL = false;
     }
 
     // mainloop exiting, clean up things created in mainloop lifespan.
     delete mFramerate;
     mFramerate = NULL;
+}
+
+void NvSampleApp::mainLoopInternal() {
+    bool needsReshape = false;
+
+    getPlatformContext()->pollEvents(this);
+
+    NvPlatformContext* ctx = getPlatformContext();
+
+    baseUpdate();
+
+    // If the context has been lost and graphics resources are still around,
+    // signal for them to be deleted
+    if (ctx->isContextLost()) {
+        if (mHasInitializedGL) {
+            baseShutdownRendering();
+            mHasInitializedGL = false;
+        }
+    }
+
+    // If we're ready to render (i.e. the GL is ready and we're focused), then go ahead
+    if (ctx->shouldRender()) {
+        // If we've not (re-)initialized the resources, do it
+        if (!mHasInitializedGL) {
+            NvImage::setAPIVersion(getGLContext()->getConfiguration().apiVer);
+
+            baseInitRendering();
+            mHasInitializedGL = true;
+            needsReshape = true;
+
+            // In test mode, disable VSYNC if possible
+            if (mTestMode)
+                getGLContext()->setSwapInterval(0);
+        } else if (ctx->hasWindowResized()) {
+            if (mUIWindow) {
+                const int32_t w = getGLContext()->width(), h = getGLContext()->height();
+                mUIWindow->HandleReshape((float)w, (float)h);
+            }
+
+            needsReshape = true;
+        }
+
+        if (needsReshape) {
+            baseReshape(getGLContext()->width(), getGLContext()->height());
+        }
+
+        mFrameTimer->stop();
+
+        if (mTestMode) {
+            // Simulate 60fps
+            mFrameDelta = 1.0f / 60.0f;
+
+            // just an estimate
+            mTotalTime += mFrameTimer->getTime();
+        } else {
+            mFrameDelta = mFrameTimer->getTime();
+            // just an estimate
+            mTotalTime += mFrameDelta;
+        }
+        m_transformer->update(mFrameDelta);
+        mFrameTimer->reset();
+
+        // initialization may cause the app to want to exit
+        if (!isExiting()) {
+            mFrameTimer->start();
+
+            if (mAutoRepeatButton) {
+                const float elapsed = mAutoRepeatTimer->getTime();
+                if ( (!mAutoRepeatTriggered && elapsed >= 0.5f) ||
+                     (mAutoRepeatTriggered && elapsed >= 0.04f) ) { // 25hz repeat
+                    mAutoRepeatTriggered = true;
+                    gamepadButtonChanged(mAutoRepeatButton, true);
+                }
+            }
+
+            baseDraw();
+            CHECK_GL_ERROR(); // sanity catch errors
+            if (!mTestMode) {
+                baseDrawUI();
+                CHECK_GL_ERROR(); // sanity catch errors
+            }
+
+            if (mTestMode && (mTestRepeatFrames > 1)) {
+                // repeat frame so that we can simulate a heavier workload
+                for (int i = 1; i < mTestRepeatFrames; i++) {
+                    baseUpdate();
+                    m_transformer->update(mFrameDelta);
+                    baseDraw();
+                }
+            }
+
+            if (mTestMode && mUseFBOPair) {
+                // Check if the app bound FBO 0 in FBO mode
+                GLuint currFBO = 0;
+                // Enum has MANY names based on extension/version
+                // but they all map to 0x8CA6
+                glGetIntegerv(0x8CA6, (GLint*)&currFBO);
+
+                if (currFBO == 0)
+                    m_testModeIssues |= TEST_MODE_FBO_ISSUE;
+            }
+
+            SwapBuffers();
+
+            if (mFramerate->nextFrame()) {
+                // for now, disabling console output of fps as we have on-screen.
+                // makes it easier to read USEFUL log output messages.
+                //LOGI("fps: %.2f", mFramerate->getMeanFramerate());
+            }
+        }
+
+        if (mTestMode) {
+            mTestModeFrames++;
+            // if we've come to the end of the warm-up, start timing
+            if (mTestModeFrames == 0) {
+                mTotalTime = 0.0f;
+                mTestModeTimer->start();
+            }
+
+            if (mTotalTime > mTestDuration) {
+                mTestModeTimer->stop();
+                double frameRate = mTestModeFrames / mTestModeTimer->getTime();
+                logTestResults((float)frameRate, mTestModeFrames);
+                exit(0);
+//                    appRequestExit();
+            }
+        }
+    }
 }
 
 bool NvSampleApp::requireExtension(const char* ext, bool exitOnFailure) {
