@@ -12,8 +12,8 @@ changes to input callbacks (`InputCallbacksHtml5.cpp`).
 replaced with plain `float` (4 bytes).
 
 
-Building the sample with Emscripten
------------------------------------
+Building the sample
+-------------------
 
 Install Emscripten and make sure em++ is visible. Go to
 `{SAMPLES_ROOT}/samples/build/html5/`
@@ -23,9 +23,10 @@ and run make. SkinningApp is built and placed into
 
 Check the results with
 `python -m SimpleHTTPServer 8080`
-
 or something similar. Tested with Emscripten 1.21.0.
 
+See it online [here](http://matejd.github.io/OpenGLSamples/SkinningApp.html)
+![Screenshot](http://matejd.github.io/OpenGLSamples/screenshot.png)
 
 
 NVIDIA GameWorks OpenGL Graphics and Compute Samples
