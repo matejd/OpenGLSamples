@@ -24,8 +24,8 @@ and run make. SkinningApp is built and placed into
 Check the results with
 `python -m SimpleHTTPServer 8080`
 or something similar. Tested with Emscripten 1.21.0.
+See it online [here](http://matejd.github.io/OpenGLSamples/SkinningApp.html).
 
-See it online [here](http://matejd.github.io/OpenGLSamples/SkinningApp.html)
 ![Screenshot](http://matejd.github.io/OpenGLSamples/screenshot.png)
 
 
