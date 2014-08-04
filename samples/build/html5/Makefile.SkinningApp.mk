@@ -4,24 +4,14 @@
 ProjectName = SkinningApp
 
 SkinningApp_cppfiles   += ./../../../extensions/externals/src/Half/half.cpp
-#SkinningApp_cppfiles   += ./../../../extensions/src/NvAppBase/EngineAndroid.cpp
-#SkinningApp_cppfiles   += ./../../../extensions/src/NvAppBase/InputCallbacksGLFW.cpp
 SkinningApp_cppfiles   += ./../../../extensions/src/NvAppBase/InputCallbacksHtml5.cpp
-#SkinningApp_cppfiles   += ./../../../extensions/src/NvAppBase/MainAndroid.cpp
-#SkinningApp_cppfiles   += ./../../../extensions/src/NvAppBase/MainLinux.cpp
 SkinningApp_cppfiles   += ./../../../extensions/src/NvAppBase/MainHtml5.cpp
-#SkinningApp_cppfiles   += ./../../../extensions/src/NvAppBase/MainMacOSX.cpp
-#SkinningApp_cppfiles   += ./../../../extensions/src/NvAppBase/MainWin32.cpp
 SkinningApp_cppfiles   += ./../../../extensions/src/NvAppBase/NvAppBase.cpp
 SkinningApp_cppfiles   += ./../../../extensions/src/NvAppBase/NvFramerateCounter.cpp
 SkinningApp_cppfiles   += ./../../../extensions/src/NvAppBase/NvInputTransformer.cpp
 SkinningApp_cppfiles   += ./../../../extensions/src/NvAppBase/NvLogs.cpp
 SkinningApp_cppfiles   += ./../../../extensions/src/NvAppBase/NvSampleApp.cpp
-#SkinningApp_cfiles   += ./../../../extensions/src/NvAppBase/NvAndroidNativeAppGlue.c
 SkinningApp_cppfiles   += ./../../../extensions/src/NvAssetLoader/NvAssetLoader.cpp
-#SkinningApp_cppfiles   += ./../../../extensions/src/NvGamepad/NvGamepadAndroid.cpp
-#SkinningApp_cppfiles   += ./../../../extensions/src/NvGamepad/NvGamepadLinux.cpp
-#SkinningApp_cppfiles   += ./../../../extensions/src/NvGamepad/NvGamepadXInput.cpp
 SkinningApp_cppfiles   += ./../../../extensions/src/NvGLUtils/BlockDXT.cpp
 SkinningApp_cppfiles   += ./../../../extensions/src/NvGLUtils/ColorBlock.cpp
 SkinningApp_cppfiles   += ./../../../extensions/src/NvGLUtils/NvFilePtr.cpp
@@ -66,48 +56,22 @@ SkinningApp_debug_hpaths    :=
 SkinningApp_debug_hpaths    += ./../../SkinningApp
 SkinningApp_debug_hpaths    += ./../../../extensions/include
 SkinningApp_debug_hpaths    += ./../../../extensions/externals/include
-#SkinningApp_debug_hpaths    += ./../../../extensions/externals/include/GLFW
 SkinningApp_debug_lpaths    := 
-#SkinningApp_debug_lpaths    += ./../../../extensions/externals/lib/linux64
-#SkinningApp_debug_lpaths    += ./../../../extensions/lib/linux64
-#SkinningApp_debug_lpaths    += ./../../../../../../../../../../../../../usr/lib/x86_64-linux-gnu
-#SkinningApp_debug_lpaths    += ./../../../extensions/externals/lib/osx32
-#SkinningApp_debug_lpaths    += ./../../../extensions/lib/linux64
 SkinningApp_debug_defines   := $(SkinningApp_custom_defines)
 SkinningApp_debug_defines   += LINUX=1
 SkinningApp_debug_defines   += GLEW_NO_GLU=1
 SkinningApp_debug_defines   += _DEBUG
 SkinningApp_debug_libraries := 
-#SkinningApp_debug_libraries += GL
-#SkinningApp_debug_libraries += GLU
-#SkinningApp_debug_libraries += GLEW
-#SkinningApp_debug_libraries += glfw3
-#SkinningApp_debug_libraries += pthread
-#SkinningApp_debug_libraries += rt
-#SkinningApp_debug_libraries += dl
-#SkinningApp_debug_libraries += X11
-#SkinningApp_debug_libraries += Xrandr
-#SkinningApp_debug_libraries += Xxf86vm
-#SkinningApp_debug_libraries += Xi
-#SkinningApp_debug_libraries += HalfD
-#SkinningApp_debug_libraries += NvAppBaseD
-#SkinningApp_debug_libraries += NvAssetLoaderD
-#SkinningApp_debug_libraries += NvGamepadD
-#SkinningApp_debug_libraries += NvGLUtilsD
-#SkinningApp_debug_libraries += NvModelD
-#SkinningApp_debug_libraries += NvUID
 SkinningApp_debug_common_cflags	:= $(SkinningApp_custom_cflags)
 SkinningApp_debug_common_cflags    += -MMD
 SkinningApp_debug_common_cflags    += $(addprefix -D, $(SkinningApp_debug_defines))
 SkinningApp_debug_common_cflags    += $(addprefix -I, $(SkinningApp_debug_hpaths))
 SkinningApp_debug_common_cflags  += -m64
 SkinningApp_debug_cflags	:= $(SkinningApp_debug_common_cflags)
-SkinningApp_debug_cflags  += -Wall -Wextra -Wno-unused-parameter -Wno-ignored-qualifiers -Wno-unused-but-set-variable -Wno-switch -Wno-unused-variable -Wno-unused-function -Wno-reorder
-SkinningApp_debug_cflags  += -malign-double
+SkinningApp_debug_cflags  += -Wall -Wextra -Wno-unused-parameter -Wno-ignored-qualifiers -Wno-switch -Wno-unused-variable -Wno-unused-function -Wno-reorder
 SkinningApp_debug_cflags  += -g
 SkinningApp_debug_cppflags	:= $(SkinningApp_debug_common_cflags)
-SkinningApp_debug_cppflags  += -Wall -Wextra -Wno-unused-parameter -Wno-ignored-qualifiers -Wno-unused-but-set-variable -Wno-switch -Wno-unused-variable -Wno-unused-function -Wno-reorder
-SkinningApp_debug_cppflags  += -malign-double
+SkinningApp_debug_cppflags  += -Wall -Wextra -Wno-unused-parameter -Wno-ignored-qualifiers -Wno-switch -Wno-unused-variable -Wno-unused-function -Wno-reorder
 SkinningApp_debug_cppflags  += -g
 SkinningApp_debug_lflags    := $(SkinningApp_custom_lflags)
 SkinningApp_debug_lflags    += $(addprefix -L, $(SkinningApp_debug_lpaths))
@@ -157,3 +121,84 @@ $(SkinningApp_debug_c_o): $(SkinningApp_debug_objsdir)/%.o:
 		-e '/^$$/ d' -e 's/$$/ :/' < $(SkinningApp_debug_DEPDIR).d >> $(addprefix $(DEPSDIR)/, $(subst ./, , $(subst ../, , $(filter %$(strip $(subst .c.o,.c, $(subst $(SkinningApp_debug_objsdir),, $@))), $(SkinningApp_cfiles))))).debug.P; \
 	  rm -f $(SkinningApp_debug_DEPDIR).d
 
+
+
+SkinningApp_cpp_release_dep    = $(addprefix $(DEPSDIR)/, $(subst ./, , $(subst ../, , $(patsubst %.cpp, %.cpp.release.P, $(SkinningApp_cppfiles)))))
+SkinningApp_c_release_dep      = $(addprefix $(DEPSDIR)/, $(subst ./, , $(subst ../, , $(patsubst %.c, %.c.release.P, $(SkinningApp_cfiles)))))
+SkinningApp_release_dep      = $(SkinningApp_cpp_release_dep) $(SkinningApp_c_release_dep)
+-include $(SkinningApp_release_dep)
+SkinningApp_cpp_release_dep    = $(addprefix $(DEPSDIR)/, $(subst ./, , $(subst ../, , $(patsubst %.cpp, %.cpp.release.P, $(SkinningApp_cppfiles)))))
+SkinningApp_c_release_dep      = $(addprefix $(DEPSDIR)/, $(subst ./, , $(subst ../, , $(patsubst %.c, %.c.release.P, $(SkinningApp_cfiles)))))
+SkinningApp_release_dep      = $(SkinningApp_cpp_release_dep) $(SkinningApp_c_release_dep)
+-include $(SkinningApp_release_dep)
+SkinningApp_release_hpaths    := 
+SkinningApp_release_hpaths    += ./../../SkinningApp
+SkinningApp_release_hpaths    += ./../../../extensions/include
+SkinningApp_release_hpaths    += ./../../../extensions/externals/include
+SkinningApp_release_lpaths    := 
+SkinningApp_release_defines   := $(SkinningApp_custom_defines)
+SkinningApp_release_defines   += LINUX=1
+SkinningApp_release_defines   += GLEW_NO_GLU=1
+SkinningApp_release_defines   += NDEBUG
+SkinningApp_release_libraries := 
+SkinningApp_release_common_cflags	:= $(SkinningApp_custom_cflags)
+SkinningApp_release_common_cflags    += -MMD
+SkinningApp_release_common_cflags    += $(addprefix -D, $(SkinningApp_release_defines))
+SkinningApp_release_common_cflags    += $(addprefix -I, $(SkinningApp_release_hpaths))
+SkinningApp_release_common_cflags  += -m64
+SkinningApp_release_cflags	:= $(SkinningApp_release_common_cflags)
+SkinningApp_release_cflags  += -Wall -Wextra -Wno-unused-parameter -Wno-ignored-qualifiers -Wno-switch -Wno-unused-variable -Wno-unused-function -Wno-reorder
+SkinningApp_release_cflags  += -O2
+SkinningApp_release_cppflags	:= $(SkinningApp_release_common_cflags)
+SkinningApp_release_cppflags  += -Wall -Wextra -Wno-unused-parameter -Wno-ignored-qualifiers -Wno-switch -Wno-unused-variable -Wno-unused-function -Wno-reorder
+SkinningApp_release_cppflags  += -O2
+SkinningApp_release_lflags    := $(SkinningApp_custom_lflags)
+SkinningApp_release_lflags    += $(addprefix -L, $(SkinningApp_release_lpaths))
+SkinningApp_release_lflags    += -Wl,--start-group $(addprefix -l, $(SkinningApp_release_libraries)) -Wl,--end-group
+SkinningApp_release_lflags  += -Wl,--unresolved-symbols=ignore-in-shared-libs
+SkinningApp_release_lflags  += -m64
+SkinningApp_release_lflags  += --preload-file ../../SkinningApp/assets
+SkinningApp_release_objsdir  = $(OBJS_DIR)/SkinningApp_release
+SkinningApp_release_cpp_o    = $(addprefix $(SkinningApp_release_objsdir)/, $(subst ./, , $(subst ../, , $(patsubst %.cpp, %.cpp.o, $(SkinningApp_cppfiles)))))
+SkinningApp_release_c_o      = $(addprefix $(SkinningApp_release_objsdir)/, $(subst ./, , $(subst ../, , $(patsubst %.c, %.c.o, $(SkinningApp_cfiles)))))
+SkinningApp_release_obj      = $(SkinningApp_release_cpp_o) $(SkinningApp_release_c_o)
+SkinningApp_release_bin      := ./../../bin/html5/SkinningApp.html
+
+clean_SkinningApp_release: 
+	@$(ECHO) clean SkinningApp release
+	@$(RMDIR) $(SkinningApp_release_objsdir)
+	@$(RMDIR) $(SkinningApp_release_bin)
+
+build_SkinningApp_release: postbuild_SkinningApp_release
+postbuild_SkinningApp_release: mainbuild_SkinningApp_release
+mainbuild_SkinningApp_release: prebuild_SkinningApp_release $(SkinningApp_release_bin)
+prebuild_SkinningApp_release:
+
+$(SkinningApp_release_bin): $(SkinningApp_release_obj)
+	@mkdir -p `dirname ./../../bin/html5/SkinningApp`
+	@$(CCLD) $(SkinningApp_release_obj) $(SkinningApp_release_lflags) -o $(SkinningApp_release_bin) 
+	@$(ECHO) building $@ complete!
+
+SkinningApp_release_DEPDIR = $(dir $(@))/$(*F)
+$(SkinningApp_release_cpp_o): $(SkinningApp_release_objsdir)/%.o:
+	@$(ECHO) SkinningApp: compiling release $(filter %$(strip $(subst .cpp.o,.cpp, $(subst $(SkinningApp_release_objsdir),, $@))), $(SkinningApp_cppfiles))...
+	@mkdir -p $(dir $(@))
+	@$(CXX) $(SkinningApp_release_cppflags) -c $(filter %$(strip $(subst .cpp.o,.cpp, $(subst $(SkinningApp_release_objsdir),, $@))), $(SkinningApp_cppfiles)) -o $@
+	@mkdir -p $(dir $(addprefix $(DEPSDIR)/, $(subst ./, , $(subst ../, , $(filter %$(strip $(subst .cpp.o,.cpp, $(subst $(SkinningApp_release_objsdir),, $@))), $(SkinningApp_cppfiles))))))
+	@cp $(SkinningApp_release_DEPDIR).d $(addprefix $(DEPSDIR)/, $(subst ./, , $(subst ../, , $(filter %$(strip $(subst .cpp.o,.cpp, $(subst $(SkinningApp_release_objsdir),, $@))), $(SkinningApp_cppfiles))))).release.P; \
+	  sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
+		-e '/^$$/ d' -e 's/$$/ :/' < $(SkinningApp_release_DEPDIR).d >> $(addprefix $(DEPSDIR)/, $(subst ./, , $(subst ../, , $(filter %$(strip $(subst .cpp.o,.cpp, $(subst $(SkinningApp_release_objsdir),, $@))), $(SkinningApp_cppfiles))))).release.P; \
+	  rm -f $(SkinningApp_release_DEPDIR).d
+
+$(SkinningApp_release_c_o): $(SkinningApp_release_objsdir)/%.o:
+	@$(ECHO) SkinningApp: compiling release $(filter %$(strip $(subst .c.o,.c, $(subst $(SkinningApp_release_objsdir),, $@))), $(SkinningApp_cfiles))...
+	@mkdir -p $(dir $(@))
+	@$(CC) $(SkinningApp_release_cflags) -c $(filter %$(strip $(subst .c.o,.c, $(subst $(SkinningApp_release_objsdir),, $@))), $(SkinningApp_cfiles)) -o $@ 
+	@mkdir -p $(dir $(addprefix $(DEPSDIR)/, $(subst ./, , $(subst ../, , $(filter %$(strip $(subst .c.o,.c, $(subst $(SkinningApp_release_objsdir),, $@))), $(SkinningApp_cfiles))))))
+	@cp $(SkinningApp_release_DEPDIR).d $(addprefix $(DEPSDIR)/, $(subst ./, , $(subst ../, , $(filter %$(strip $(subst .c.o,.c, $(subst $(SkinningApp_release_objsdir),, $@))), $(SkinningApp_cfiles))))).release.P; \
+	  sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
+		-e '/^$$/ d' -e 's/$$/ :/' < $(SkinningApp_release_DEPDIR).d >> $(addprefix $(DEPSDIR)/, $(subst ./, , $(subst ../, , $(filter %$(strip $(subst .c.o,.c, $(subst $(SkinningApp_release_objsdir),, $@))), $(SkinningApp_cfiles))))).release.P; \
+	  rm -f $(SkinningApp_release_DEPDIR).d
+
+clean_SkinningApp:  clean_SkinningApp_debug clean_SkinningApp_release
+	@rm -rf $(DEPSDIR)

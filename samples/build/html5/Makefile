@@ -15,11 +15,14 @@ AR		 = ar
 STRIP     = strip
 OBJDUMP   = objdump
 OBJCOPY   = objcopy
--include Makedefs.html5.mk
 
 all: debug release 
 
 debug: build_SkinningApp_debug
+
+release: build_SkinningApp_release
+
+clean: clean_SkinningApp
 
 include Makefile.SkinningApp.mk
 
